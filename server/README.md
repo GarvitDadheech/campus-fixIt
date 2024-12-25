@@ -9,7 +9,6 @@ A robust Node.js + Express + TypeScript backend for the Campus Issue Reporting S
 - **CRUD Operations** for issues
 - **Image Upload** via Cloudinary
 - **Email Notifications** on status changes
-- **Push Notifications** via Firebase Cloud Messaging
 - **Issue Priority Levels** (Low, Medium, High, Critical)
 - **Issue Categories** (Electrical, Water, Internet, Infrastructure)
 - **Status Tracking** (Open, In Progress, Resolved)
@@ -28,7 +27,6 @@ server/
 │   │   ├── database.ts   # MongoDB connection
 │   │   ├── env.ts        # Environment variables
 │   │   ├── cloudinary.ts # Cloudinary setup
-│   │   └── firebase.ts   # Firebase Admin setup
 │   ├── controllers/      # Route controllers
 │   │   ├── auth.controller.ts
 │   │   ├── issue.controller.ts
@@ -51,7 +49,6 @@ server/
 │   │   ├── auth.service.ts
 │   │   ├── issue.service.ts
 │   │   ├── email.service.ts
-│   │   ├── notification.service.ts
 │   │   ├── upload.service.ts
 │   │   └── user.service.ts
 │   ├── types/            # TypeScript types
@@ -433,17 +430,6 @@ department: "Electronics"
 image: <file>  // Avatar image
 ```
 
-### Update FCM Token
-```http
-PUT /api/users/fcm-token
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-{
-  "fcmToken": "firebase-cloud-messaging-token..."
-}
-```
-
 ---
 
 ## Error Responses
@@ -487,18 +473,6 @@ Emails are sent automatically for:
 - Welcome email on registration
 - Issue created confirmation
 - Issue status updates
-
-### Push Notifications
-
-Push notifications (via Firebase) are sent for:
-- New issue reported (to admins)
-- Issue status changed (to reporter)
-- Issue assigned (to assigned admin)
-
-To enable push notifications:
-1. Set up Firebase project
-2. Configure Firebase credentials in `.env`
-3. Store user's FCM token via `/api/users/fcm-token`
 
 ---
 

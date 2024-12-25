@@ -10,8 +10,6 @@ import {
 } from '../types';
 import { ApiError, buildSortObject, calculateSkip, createPaginatedResponse, log, MESSAGES, parsePaginationParams } from '../utils';
 import { emailService } from './email.service';
-import { notificationService } from './notification.service';
-
 class IssueService {
   /**
    * Create a new issue
@@ -282,7 +280,7 @@ class IssueService {
       await this.sendStatusUpdateNotifications(issue, previousStatus, status);
 
       return issue.populate([
-        { path: 'reportedBy', select: 'name email studentId department fcmToken' },
+        { path: 'reportedBy', select: 'name email studentId department' },
         { path: 'assignedTo', select: 'name email' },
         { path: 'statusHistory.changedBy', select: 'name email' },
       ]);
@@ -480,22 +478,7 @@ class IssueService {
         issue.remarks
       );
 
-      // Send push notification if FCM token exists
-      if (reporter.fcmToken) {
-        await notificationService.sendPushNotification(
-          reporter.fcmToken,
-          {
-            title: 'Issue Status Updated',
-            body: `Your issue "${issue.title}" status changed to ${newStatus.replace('_', ' ')}`,
-            data: {
-              issueId: issue._id.toString(),
-              type: 'status_update',
-            },
-          }
-        );
-      }
-
-      log.debug('Status update notifications sent', { issueId: issue._id, reporterId: reporter._id });
+      log.debug('Status update notification sent', { issueId: issue._id, reporterId: reporter._id });
     } catch (error) {
       log.error('Failed to send status update notifications', error, { issueId: issue._id });
       // Don't throw - notifications are non-critical

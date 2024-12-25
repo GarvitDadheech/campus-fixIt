@@ -49,10 +49,6 @@ const userSchema = new Schema<IUser>(
       type: String,
       default: null,
     },
-    fcmToken: {
-      type: String,
-      default: null,
-    },
     isActive: {
       type: Boolean,
       default: true,
@@ -92,7 +88,7 @@ userSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
-  } catch (error) {
+  } catch {
     return false;
   }
 };

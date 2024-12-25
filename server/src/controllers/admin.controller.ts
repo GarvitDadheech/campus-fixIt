@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { issueService, notificationService, userService } from '../services';
+import { issueService, userService } from '../services';
 import { AuthenticatedRequest, IIssueFilter, IssueStatus, UserRole } from '../types';
 import { ApiResponse, asyncHandler, MESSAGES } from '../utils';
 
@@ -60,17 +60,6 @@ export const assignIssue = asyncHandler(
 
     const issue = await issueService.assignIssue(id, adminId);
 
-    // Notify the admin who got assigned
-    if (req.user!.fcmToken) {
-      notificationService
-        .sendIssueAssignedNotification(
-          req.user!.fcmToken,
-          issue.title,
-          issue._id.toString()
-        )
-        .catch(console.error);
-    }
-
     const response = ApiResponse.success(issue, 'Issue assigned successfully');
     res.status(response.statusCode).json(response);
   }
@@ -93,17 +82,6 @@ export const assignIssueToAdmin = asyncHandler(
     }
 
     const issue = await issueService.assignIssue(id, adminId);
-
-    // Notify the assigned admin
-    if (targetAdmin.fcmToken) {
-      notificationService
-        .sendIssueAssignedNotification(
-          targetAdmin.fcmToken,
-          issue.title,
-          issue._id.toString()
-        )
-        .catch(console.error);
-    }
 
     const response = ApiResponse.success(issue, 'Issue assigned successfully');
     res.status(response.statusCode).json(response);

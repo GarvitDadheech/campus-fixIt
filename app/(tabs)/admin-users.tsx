@@ -33,13 +33,13 @@ export default function AdminUsersScreen() {
 
       const response = await apiService.getAllUsers(params);
       if (response.success && response.data) {
-        const newUsers = response.data.data;
+        const newUsers = Array.isArray(response.data) ? response.data : [];
         if (reset) {
           setUsers(newUsers);
         } else {
           setUsers([...users, ...newUsers]);
         }
-        setHasMore(response.data.pagination?.hasNextPage || false);
+        setHasMore(response.pagination?.hasNextPage || false);
       }
     } catch (error) {
       console.error('Error loading users:', error);
@@ -218,6 +218,7 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
+    paddingTop: 44,
     gap: 8,
   },
   filterButton: {

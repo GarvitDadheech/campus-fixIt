@@ -53,22 +53,6 @@ export const updateProfile = asyncHandler(
 );
 
 /**
- * Update FCM token for push notifications
- * PUT /api/users/fcm-token
- */
-export const updateFcmToken = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user!._id.toString();
-    const { fcmToken } = req.body;
-
-    await userService.updateFcmToken(userId, fcmToken);
-
-    const response = ApiResponse.success(null, MESSAGES.USER.FCM_TOKEN_UPDATE_SUCCESS);
-    res.status(response.statusCode).json(response);
-  }
-);
-
-/**
  * Get user by ID (admin or self)
  * GET /api/users/:id
  */

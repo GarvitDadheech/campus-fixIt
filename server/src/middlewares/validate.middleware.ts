@@ -219,12 +219,6 @@ export const updateProfileSchema = z.object({
   }),
 });
 
-export const updateFcmTokenSchema = z.object({
-  body: z.object({
-    fcmToken: z.string({ message: 'FCM token is required' }),
-  }),
-});
-
 export const updateUserRoleSchema = z.object({
   params: z.object({
     id: z.string().regex(/^[a-fA-F0-9]{24}$/, 'Invalid user ID format'),

@@ -40,7 +40,6 @@ export interface IUser extends Document {
   department?: string;
   phone?: string;
   avatar?: string;
-  fcmToken?: string; // Firebase Cloud Messaging token for push notifications
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -175,13 +174,7 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// ==================== NOTIFICATION TYPES ====================
-
-export interface INotificationPayload {
-  title: string;
-  body: string;
-  data?: Record<string, string>;
-}
+// ==================== EMAIL TYPES ====================
 
 export interface IEmailPayload {
   to: string;

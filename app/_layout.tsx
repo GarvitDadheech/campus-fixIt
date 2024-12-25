@@ -1,3 +1,4 @@
+import * as ScreenCapture from 'expo-screen-capture';
 import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -47,6 +48,11 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    // Allow screen recording
+    ScreenCapture.allowScreenCaptureAsync();
+  }, []);
+
   return (
     <Provider store={store}>
       <AuthProvider>

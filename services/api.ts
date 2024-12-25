@@ -282,9 +282,6 @@ class ApiService {
     });
   }
 
-  async updateFcmToken(fcmToken: string) {
-    return this.request('PUT', '/users/fcm-token', { fcmToken });
-  }
 }
 
 export const apiService = new ApiService();

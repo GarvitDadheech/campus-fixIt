@@ -22,7 +22,6 @@ export const MESSAGES = {
     DELETE_SUCCESS: 'User deleted successfully',
     PASSWORD_UPDATE_SUCCESS: 'Password updated successfully',
     PROFILE_UPDATE_SUCCESS: 'Profile updated successfully',
-    FCM_TOKEN_UPDATE_SUCCESS: 'FCM token updated successfully',
     INVALID_PASSWORD: 'Current password is incorrect',
   },
 

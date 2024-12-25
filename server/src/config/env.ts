@@ -20,11 +20,6 @@ interface EnvConfig {
   // Email (Gmail)
   EMAIL_USER: string;
   EMAIL_PASSWORD: string;
-  
-  // Firebase (for push notifications)
-  FIREBASE_PROJECT_ID: string;
-  FIREBASE_PRIVATE_KEY: string;
-  FIREBASE_CLIENT_EMAIL: string;
 }
 
 const getEnvVar = (key: string, defaultValue?: string): string => {
@@ -66,11 +61,6 @@ export const env: EnvConfig = {
   // Email (Gmail)
   EMAIL_USER: getEnvVar('EMAIL_USER', ''),
   EMAIL_PASSWORD: getEnvVar('EMAIL_PASSWORD', ''),
-  
-  // Firebase
-  FIREBASE_PROJECT_ID: getEnvVar('FIREBASE_PROJECT_ID', ''),
-  FIREBASE_PRIVATE_KEY: getEnvVar('FIREBASE_PRIVATE_KEY', ''),
-  FIREBASE_CLIENT_EMAIL: getEnvVar('FIREBASE_CLIENT_EMAIL', ''),
 };
 
 export default env;

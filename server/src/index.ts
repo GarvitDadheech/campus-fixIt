@@ -3,7 +3,7 @@ import express, { Application } from 'express';
 import path from 'path';
 
 // Import configurations
-import { configureCloudinary, connectDatabase, env, initializeFirebase } from './config';
+import { configureCloudinary, connectDatabase, env } from './config';
 
 // Import routes
 import routes from './routes';
@@ -73,9 +73,6 @@ const startServer = async (): Promise<void> => {
 
     // Configure Cloudinary
     configureCloudinary();
-
-    // Initialize Firebase (optional)
-    initializeFirebase();
 
     // Start server
     app.listen(env.PORT, () => {

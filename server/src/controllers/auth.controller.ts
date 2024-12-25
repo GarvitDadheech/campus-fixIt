@@ -88,16 +88,11 @@ export const changePassword = asyncHandler(
 );
 
 /**
- * Logout user (removes FCM token)
+ * Logout user
  * POST /api/auth/logout
  */
 export const logout = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const userId = req.user!._id.toString();
-
-    // Remove FCM token on logout
-    await userService.removeFcmToken(userId);
-
     const response = ApiResponse.success(null, MESSAGES.AUTH.LOGOUT_SUCCESS);
     res.status(response.statusCode).json(response);
   }

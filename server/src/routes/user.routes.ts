@@ -4,7 +4,6 @@ import {
     authenticate,
     handleMulterError,
     mongoIdParamSchema,
-    updateFcmTokenSchema,
     updateProfileSchema,
     uploadSingleImage,
     validate,
@@ -34,13 +33,6 @@ router.put(
   validate(updateProfileSchema),
   userController.updateProfile
 );
-
-/**
- * @route   PUT /api/users/fcm-token
- * @desc    Update FCM token for push notifications
- * @access  Private
- */
-router.put('/fcm-token', validate(updateFcmTokenSchema), userController.updateFcmToken);
 
 /**
  * @route   GET /api/users/:id

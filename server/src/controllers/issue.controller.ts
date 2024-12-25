@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { issueService, uploadService, emailService, userService, notificationService } from '../services';
+import { issueService, uploadService, emailService } from '../services';
 import { ApiResponse, asyncHandler, MESSAGES, CATEGORY_DISPLAY_NAMES, PRIORITY_DISPLAY_NAMES } from '../utils';
 import { AuthenticatedRequest, IIssueFilter, UserRole } from '../types';
 
@@ -31,19 +31,6 @@ export const createIssue = asyncHandler(
       CATEGORY_DISPLAY_NAMES[issue.category],
       PRIORITY_DISPLAY_NAMES[issue.priority]
     );
-
-    // Notify admins about new issue (non-blocking)
-    userService.getAdminFcmTokens().then((tokens) => {
-      if (tokens.length > 0) {
-        notificationService.sendNewIssueNotification(
-          tokens,
-          issue.title,
-          issue.category,
-          issue.priority,
-          issue._id.toString()
-        );
-      }
-    });
 
     const response = ApiResponse.created(issue, MESSAGES.ISSUE.CREATE_SUCCESS);
     res.status(response.statusCode).json(response);

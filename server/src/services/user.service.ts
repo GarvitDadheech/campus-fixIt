@@ -75,32 +75,6 @@ class UserService {
   }
 
   /**
-   * Update FCM token for push notifications
-   */
-  async updateFcmToken(userId: string, fcmToken: string): Promise<void> {
-    try {
-      await User.findByIdAndUpdate(userId, { fcmToken });
-      log.debug('FCM token updated', { userId });
-    } catch (error) {
-      log.error('Failed to update FCM token', error, { userId });
-      throw ApiError.internal('Failed to update FCM token');
-    }
-  }
-
-  /**
-   * Remove FCM token (on logout)
-   */
-  async removeFcmToken(userId: string): Promise<void> {
-    try {
-      await User.findByIdAndUpdate(userId, { fcmToken: null });
-      log.debug('FCM token removed', { userId });
-    } catch (error) {
-      log.error('Failed to remove FCM token', error, { userId });
-      throw ApiError.internal('Failed to remove FCM token');
-    }
-  }
-
-  /**
    * Get all users (admin only)
    */
   async getAllUsers(
@@ -198,23 +172,6 @@ class UserService {
     }
   }
 
-  /**
-   * Get all admin FCM tokens (for notifications)
-   */
-  async getAdminFcmTokens(): Promise<string[]> {
-    try {
-      const admins = await User.find({
-        role: UserRole.ADMIN,
-        isActive: true,
-        fcmToken: { $ne: null, $exists: true },
-      }).select('fcmToken');
-
-      return admins.map((admin) => admin.fcmToken).filter(Boolean) as string[];
-    } catch (error) {
-      log.error('Failed to get admin FCM tokens', error);
-      return []; // Return empty array instead of throwing
-    }
-  }
 
   /**
    * Get user statistics
