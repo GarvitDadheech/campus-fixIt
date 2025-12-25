@@ -1,40 +1,45 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { Card } from '../../components/ui';
 import { Colors } from '../../constants/Colors';
-import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
 
-export default function DashboardScreen() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState({
-    total: 0,
-    open: 0,
-    inProgress: 0,
-    resolved: 0,
-  });
+interface DashboardStats {
+  issues: {
+    total: number;
+    byStatus: Record<string, number>;
+    byCategory: Record<string, number>;
+    byPriority: Record<string, number>;
+    resolvedThisMonth: number;
+    averageResolutionTime: number;
+  };
+  users: {
+    total: number;
+    students: number;
+    admins: number;
+    activeUsers: number;
+    inactiveUsers: number;
+  };
+}
+
+export default function AdminDashboardScreen() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadStats = async () => {
     try {
-      const response = await apiService.getMyIssues({ limit: 100 });
+      const response = await apiService.getDashboardStats();
       if (response.success && response.data) {
-        const issues = response.data.data;
-        setStats({
-          total: issues.length,
-          open: issues.filter((i: any) => i.status === 'open').length,
-          inProgress: issues.filter((i: any) => i.status === 'in_progress').length,
-          resolved: issues.filter((i: any) => i.status === 'resolved').length,
-        });
+        setStats(response.data as DashboardStats);
       }
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -53,9 +58,12 @@ export default function DashboardScreen() {
     loadStats();
   };
 
-  if (user?.role === 'admin') {
-    router.replace('/(tabs)/admin-dashboard');
-    return null;
+  if (loading && !stats) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   return (
@@ -64,33 +72,33 @@ export default function DashboardScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hello, {user?.name || 'Student'}!</Text>
-        <Text style={styles.subtitle}>Track your reported issues</Text>
+        <Text style={styles.title}>Admin Dashboard</Text>
+        <Text style={styles.subtitle}>Overview of all issues and users</Text>
       </View>
 
-      <View style={styles.statsContainer}>
+      <View style={styles.statsGrid}>
         <Card style={styles.statCard}>
-          <Text style={styles.statNumber}>{stats.total}</Text>
+          <Text style={styles.statNumber}>{stats?.issues.total || 0}</Text>
           <Text style={styles.statLabel}>Total Issues</Text>
         </Card>
 
         <Card style={styles.statCard}>
           <Text style={[styles.statNumber, { color: Colors.light.primary }]}>
-            {stats.open}
+            {stats?.issues.byStatus?.open || 0}
           </Text>
           <Text style={styles.statLabel}>Open</Text>
         </Card>
 
         <Card style={styles.statCard}>
           <Text style={[styles.statNumber, { color: Colors.light.warning }]}>
-            {stats.inProgress}
+            {stats?.issues.byStatus?.in_progress || 0}
           </Text>
           <Text style={styles.statLabel}>In Progress</Text>
         </Card>
 
         <Card style={styles.statCard}>
           <Text style={[styles.statNumber, { color: Colors.light.success }]}>
-            {stats.resolved}
+            {stats?.issues.byStatus?.resolved || 0}
           </Text>
           <Text style={styles.statLabel}>Resolved</Text>
         </Card>
@@ -99,20 +107,46 @@ export default function DashboardScreen() {
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => router.push('/(tabs)/create-issue')}
+          onPress={() => router.push('/(tabs)/admin-all-issues')}
         >
-          <Text style={styles.actionButtonText}>+ Report New Issue</Text>
+          <Text style={styles.actionButtonText}>View All Issues</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.actionButton, styles.secondaryButton]}
-          onPress={() => router.push('/(tabs)/my-issues')}
+          onPress={() => router.push('/(tabs)/admin-users')}
         >
           <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>
-            View All Issues
+            Manage Users
           </Text>
         </TouchableOpacity>
       </View>
+
+      {stats && (
+        <Card style={styles.detailsCard}>
+          <Text style={styles.sectionTitle}>Additional Stats</Text>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Resolved this month:</Text>
+            <Text style={styles.detailValue}>
+              {stats.issues.resolvedThisMonth}
+            </Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Avg resolution time:</Text>
+            <Text style={styles.detailValue}>
+              {stats.issues.averageResolutionTime}h
+            </Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Total users:</Text>
+            <Text style={styles.detailValue}>{stats.users.total}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Active users:</Text>
+            <Text style={styles.detailValue}>{stats.users.activeUsers}</Text>
+          </View>
+        </Card>
+      )}
     </ScrollView>
   );
 }
@@ -122,11 +156,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.light.background,
+  },
   header: {
     padding: 24,
     paddingTop: 40,
   },
-  greeting: {
+  title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: Colors.light.text,
@@ -136,7 +176,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.textSecondary,
   },
-  statsContainer: {
+  statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 16,
@@ -179,5 +219,29 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: Colors.light.primary,
+  },
+  detailsCard: {
+    margin: 16,
+    marginTop: 0,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.light.text,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+  detailValue: {
+    fontSize: 14,
+    color: Colors.light.text,
+    fontWeight: '600',
   },
 });
