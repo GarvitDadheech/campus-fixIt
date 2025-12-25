@@ -41,3 +41,11 @@ server/dist/
 server/logs/
 server/uploads/
 server/data/
+server/.env
+server/.env.local
+server/.env.*.local
+server/*.log
+server/npm-debug.log*
+server/yarn-debug.log*
+server/yarn-error.log*
+server/.DS_Store
