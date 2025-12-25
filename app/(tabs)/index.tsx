@@ -58,13 +58,21 @@ export default function DashboardScreen() {
   };
 
   useEffect(() => {
+    if (user?.role === 'admin') {
+      router.replace('/(tabs)/admin-dashboard');
+      return;
+    }
     loadStats();
-  }, []);
+  }, [user]);
 
   useFocusEffect(
     useCallback(() => {
+      if (user?.role === 'admin') {
+        router.replace('/(tabs)/admin-dashboard');
+        return;
+      }
       loadStats();
-    }, [])
+    }, [user])
   );
 
   const onRefresh = () => {
@@ -73,7 +81,6 @@ export default function DashboardScreen() {
   };
 
   if (user?.role === 'admin') {
-    router.replace('/(tabs)/admin-dashboard');
     return null;
   }
 

@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
+    paddingTop: 44,
     gap: 8,
   },
   filterButton: {

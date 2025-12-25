@@ -2,14 +2,14 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Button, Card, Input } from '../../components/ui';
 import { Colors } from '../../constants/Colors';
@@ -58,19 +58,6 @@ export default function AdminIssueDetailsScreen() {
       showSuccessToast('Issue status updated successfully');
       setShowStatusModal(false);
       setRemarks('');
-      loadIssue();
-    } catch (error: any) {
-      showErrorToast(error);
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleAssign = async () => {
-    setUpdating(true);
-    try {
-      await apiService.assignIssue(id);
-      showSuccessToast('Issue assigned to you');
       loadIssue();
     } catch (error: any) {
       showErrorToast(error);
@@ -145,9 +132,13 @@ export default function AdminIssueDetailsScreen() {
   const categoryObj = ISSUE_CATEGORIES.find((c) => c.value === issue.category);
   const priorityObj = ISSUE_PRIORITIES.find((p) => p.value === issue.priority);
   const reportedBy =
-    typeof issue.reportedBy === 'object' ? issue.reportedBy.name : 'Unknown';
+    typeof issue.reportedBy === 'object' && issue.reportedBy
+      ? issue.reportedBy.name
+      : 'Unknown';
   const assignedTo =
-    typeof issue.assignedTo === 'object' ? issue.assignedTo.name : null;
+    typeof issue.assignedTo === 'object' && issue.assignedTo
+      ? issue.assignedTo.name
+      : null;
 
   return (
     <ScrollView style={styles.container}>
@@ -240,15 +231,6 @@ export default function AdminIssueDetailsScreen() {
             variant="secondary"
             style={styles.actionButton}
           />
-          {!assignedTo && (
-            <Button
-              title="Assign to Me"
-              onPress={handleAssign}
-              variant="outline"
-              style={styles.actionButton}
-              loading={updating}
-            />
-          )}
           {issue.status !== 'resolved' && (
             <Button
               title="Mark as Resolved"
@@ -400,6 +382,7 @@ const styles = StyleSheet.create({
   },
   card: {
     margin: 16,
+    marginTop: 24,
   },
   header: {
     flexDirection: 'row',
