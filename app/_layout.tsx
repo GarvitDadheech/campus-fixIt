@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
 import { Provider } from 'react-redux';
 import { Colors } from '../constants/Colors';
 import { AuthProvider, useAuth } from '../context/AuthContext';
@@ -20,13 +21,10 @@ function RootLayoutNav() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
-    const inTabsGroup = segments[0] === '(tabs)';
 
     if (!user && !inAuthGroup) {
-      // Redirect to login if not authenticated
       router.replace('/(auth)/login');
     } else if (user && inAuthGroup) {
-      // Redirect to tabs if authenticated
       router.replace('/(tabs)');
     }
   }, [user, isLoading, segments]);
@@ -54,6 +52,7 @@ export default function RootLayout() {
       <AuthProvider>
         <RootLayoutNav />
         <StatusBar style="auto" />
+        <Toast />
       </AuthProvider>
     </Provider>
   );

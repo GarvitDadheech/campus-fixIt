@@ -16,6 +16,7 @@ import { Button, Input } from '../../components/ui';
 import { Colors } from '../../constants/Colors';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
 export default function EditProfileScreen() {
   const { user, refreshUser } = useAuth();
@@ -81,12 +82,11 @@ export default function EditProfileScreen() {
       const response = await apiService.updateProfile(formDataToSend);
       if (response.success) {
         await refreshUser();
-        Alert.alert('Success', 'Profile updated successfully!', [
-          { text: 'OK', onPress: () => router.back() },
-        ]);
+        showSuccessToast('Profile updated successfully!');
+        setTimeout(() => router.back(), 1500);
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update profile');
+      showErrorToast(error);
     } finally {
       setSaving(false);
     }

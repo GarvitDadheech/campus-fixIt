@@ -133,7 +133,7 @@ After running `npm run seed`:
 
 # API Documentation
 
-Base URL: `http://localhost:5000/api`
+Base URL: `http://localhost:3000/api`
 
 ## Authentication
 

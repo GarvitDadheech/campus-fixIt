@@ -32,13 +32,13 @@ export default function AdminAllIssuesScreen() {
 
       const response = await apiService.getAllIssues(params);
       if (response.success && response.data) {
-        const newIssues = response.data.data;
+        const newIssues = Array.isArray(response.data) ? response.data : [];
         if (reset) {
           setIssues(newIssues);
         } else {
           setIssues([...issues, ...newIssues]);
         }
-        setHasMore(response.data.pagination?.hasNextPage || false);
+        setHasMore(response.pagination?.hasNextPage || false);
       }
     } catch (error) {
       console.error('Error loading issues:', error);

@@ -16,6 +16,7 @@ import { Button, Input } from '../../components/ui';
 import { Colors } from '../../constants/Colors';
 import { ISSUE_CATEGORIES, ISSUE_PRIORITIES } from '../../constants/config';
 import { apiService } from '../../services/api';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
 export default function CreateIssueScreen() {
   const [formData, setFormData] = useState({
@@ -91,12 +92,11 @@ export default function CreateIssueScreen() {
 
       const response = await apiService.createIssue(formDataToSend);
       if (response.success) {
-        Alert.alert('Success', 'Issue created successfully!', [
-          { text: 'OK', onPress: () => router.back() },
-        ]);
+        showSuccessToast('Issue created successfully!');
+        router.back();
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create issue');
+      showErrorToast(error);
     } finally {
       setLoading(false);
     }

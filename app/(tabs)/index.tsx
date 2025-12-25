@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   RefreshControl,
   ScrollView,
@@ -28,16 +28,29 @@ export default function DashboardScreen() {
     try {
       const response = await apiService.getMyIssues({ limit: 100 });
       if (response.success && response.data) {
-        const issues = response.data.data;
+        const issues = Array.isArray(response.data) ? response.data : [];
         setStats({
           total: issues.length,
           open: issues.filter((i: any) => i.status === 'open').length,
           inProgress: issues.filter((i: any) => i.status === 'in_progress').length,
           resolved: issues.filter((i: any) => i.status === 'resolved').length,
         });
+      } else {
+        setStats({
+          total: 0,
+          open: 0,
+          inProgress: 0,
+          resolved: 0,
+        });
       }
     } catch (error) {
       console.error('Error loading stats:', error);
+      setStats({
+        total: 0,
+        open: 0,
+        inProgress: 0,
+        resolved: 0,
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -47,6 +60,12 @@ export default function DashboardScreen() {
   useEffect(() => {
     loadStats();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);

@@ -1,17 +1,17 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
     StyleSheet,
     Text,
-    View,
+    View
 } from 'react-native';
 import { Button, Input } from '../../components/ui';
 import { Colors } from '../../constants/Colors';
 import { apiService } from '../../services/api';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
 export default function ChangePasswordScreen() {
   const [formData, setFormData] = useState({
@@ -52,12 +52,11 @@ export default function ChangePasswordScreen() {
         formData.newPassword
       );
       if (response.success) {
-        Alert.alert('Success', 'Password changed successfully!', [
-          { text: 'OK', onPress: () => router.back() },
-        ]);
+        showSuccessToast('Password changed successfully!');
+        setTimeout(() => router.back(), 1500);
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to change password');
+      showErrorToast(error);
     } finally {
       setSaving(false);
     }

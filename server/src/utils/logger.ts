@@ -78,19 +78,103 @@ const logger = winston.createLogger({
 
 // Export logger methods
 export const log = {
-  info: (message: string, meta?: object) => logger.info(message, meta),
-  error: (message: string, error?: Error | unknown, meta?: object) => {
-    if (error instanceof Error) {
-      logger.error(message, { stack: error.stack, ...meta });
-    } else if (error) {
-      logger.error(message, { error, ...meta });
+  info: (message: string, meta?: object) => {
+    if (meta && Object.keys(meta).length > 0) {
+      // Format metadata for better readability
+      const metaStr = Object.entries(meta)
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            return `${key}=${JSON.stringify(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join(', ');
+      logger.info(`${message} | ${metaStr}`);
     } else {
-      logger.error(message, meta);
+      logger.info(message);
     }
   },
-  warn: (message: string, meta?: object) => logger.warn(message, meta),
-  debug: (message: string, meta?: object) => logger.debug(message, meta),
-  http: (message: string, meta?: object) => logger.http(message, meta),
+  error: (message: string, error?: Error | unknown, meta?: object) => {
+    if (error instanceof Error) {
+      const errorMeta = { stack: error.stack, message: error.message, ...meta };
+      const metaStr = Object.entries(errorMeta)
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            return `${key}=${JSON.stringify(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join(', ');
+      logger.error(`${message} | ${metaStr}`);
+    } else if (error) {
+      const metaStr = Object.entries({ error, ...meta })
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            return `${key}=${JSON.stringify(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join(', ');
+      logger.error(`${message} | ${metaStr}`);
+    } else if (meta && Object.keys(meta).length > 0) {
+      const metaStr = Object.entries(meta)
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            return `${key}=${JSON.stringify(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join(', ');
+      logger.error(`${message} | ${metaStr}`);
+    } else {
+      logger.error(message);
+    }
+  },
+  warn: (message: string, meta?: object) => {
+    if (meta && Object.keys(meta).length > 0) {
+      const metaStr = Object.entries(meta)
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            return `${key}=${JSON.stringify(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join(', ');
+      logger.warn(`${message} | ${metaStr}`);
+    } else {
+      logger.warn(message);
+    }
+  },
+  debug: (message: string, meta?: object) => {
+    if (meta && Object.keys(meta).length > 0) {
+      const metaStr = Object.entries(meta)
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            return `${key}=${JSON.stringify(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join(', ');
+      logger.debug(`${message} | ${metaStr}`);
+    } else {
+      logger.debug(message);
+    }
+  },
+  http: (message: string, meta?: object) => {
+    if (meta && Object.keys(meta).length > 0) {
+      const metaStr = Object.entries(meta)
+        .map(([key, value]) => {
+          if (typeof value === 'object' && value !== null) {
+            return `${key}=${JSON.stringify(value)}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join(', ');
+      logger.http(`${message} | ${metaStr}`);
+    } else {
+      logger.http(message);
+    }
+  },
 };
 
 export default log;

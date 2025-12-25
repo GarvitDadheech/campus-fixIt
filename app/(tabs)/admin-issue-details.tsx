@@ -16,6 +16,7 @@ import { Colors } from '../../constants/Colors';
 import { ISSUE_CATEGORIES, ISSUE_PRIORITIES, ISSUE_STATUS } from '../../constants/config';
 import { apiService } from '../../services/api';
 import { Issue } from '../../types';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
 export default function AdminIssueDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,19 +48,19 @@ export default function AdminIssueDetailsScreen() {
 
   const handleUpdateStatus = async () => {
     if (!status) {
-      Alert.alert('Error', 'Please select a status');
+      showErrorToast({ message: 'Please select a status' });
       return;
     }
 
     setUpdating(true);
     try {
       await apiService.updateIssueStatus(id, status, remarks.trim() || undefined);
-      Alert.alert('Success', 'Issue status updated successfully');
+      showSuccessToast('Issue status updated successfully');
       setShowStatusModal(false);
       setRemarks('');
       loadIssue();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update status');
+      showErrorToast(error);
     } finally {
       setUpdating(false);
     }
@@ -69,10 +70,10 @@ export default function AdminIssueDetailsScreen() {
     setUpdating(true);
     try {
       await apiService.assignIssue(id);
-      Alert.alert('Success', 'Issue assigned to you');
+      showSuccessToast('Issue assigned to you');
       loadIssue();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to assign issue');
+      showErrorToast(error);
     } finally {
       setUpdating(false);
     }
@@ -80,19 +81,19 @@ export default function AdminIssueDetailsScreen() {
 
   const handleAddRemarks = async () => {
     if (!remarks.trim()) {
-      Alert.alert('Error', 'Please enter remarks');
+      showErrorToast({ message: 'Please enter remarks' });
       return;
     }
 
     setUpdating(true);
     try {
       await apiService.addRemarks(id, remarks.trim());
-      Alert.alert('Success', 'Remarks added successfully');
+      showSuccessToast('Remarks added successfully');
       setShowRemarksModal(false);
       setRemarks('');
       loadIssue();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to add remarks');
+      showErrorToast(error);
     } finally {
       setUpdating(false);
     }
@@ -110,11 +111,11 @@ export default function AdminIssueDetailsScreen() {
             setUpdating(true);
             try {
               await apiService.resolveIssue(id, remarks.trim() || undefined);
-              Alert.alert('Success', 'Issue marked as resolved');
+              showSuccessToast('Issue marked as resolved');
               setRemarks('');
               loadIssue();
             } catch (error: any) {
-              Alert.alert('Error', error.message || 'Failed to resolve issue');
+              showErrorToast(error);
             } finally {
               setUpdating(false);
             }

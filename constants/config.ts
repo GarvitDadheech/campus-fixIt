@@ -1,21 +1,8 @@
 /**
  * API Configuration
- * For iOS Simulator: use localhost
- * For Android Emulator: use 10.0.2.2
- * For Physical Device: use your computer's IP address
  */
-const getBaseUrl = () => {
-  if (__DEV__) {
-    // Use your computer's local IP for physical devices
-    // For simulator/emulator, use localhost
-    return 'http://localhost:5000/api';
-    // For physical device, replace with your IP: 'http://192.168.x.x:5000/api'
-  }
-  return 'https://your-production-api.com/api';
-};
-
 export const API_CONFIG = {
-  BASE_URL: getBaseUrl(),
+  BASE_URL: 'https://f5951ef37b01.ngrok-free.app/api',
   TIMEOUT: 10000,
 };
 

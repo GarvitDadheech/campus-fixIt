@@ -1,8 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { Colors } from '../../constants/Colors';
-import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext';
 
 export default function TabLayout() {
   const { user } = useAuth();
@@ -105,6 +105,12 @@ export default function TabLayout() {
             href: null,
           }}
         />
+        <Tabs.Screen
+          name="explore"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     );
   }
@@ -201,6 +207,12 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="admin-issue-details"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
         options={{
           href: null,
         }}

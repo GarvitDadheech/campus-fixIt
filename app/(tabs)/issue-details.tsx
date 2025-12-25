@@ -7,10 +7,9 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
 } from 'react-native';
-import { Card } from '../../components/ui';
+import { Button, Card } from '../../components/ui';
 import { Colors } from '../../constants/Colors';
 import { ISSUE_CATEGORIES, ISSUE_PRIORITIES, ISSUE_STATUS } from '../../constants/config';
 import { useAuth } from '../../context/AuthContext';
@@ -22,15 +21,15 @@ export default function IssueDetailsScreen() {
   const { user } = useAuth();
   const [issue, setIssue] = useState<Issue | null>(null);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadIssue();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadIssue = async () => {
     try {
-      const response = await apiService.getIssueById(id);
+      const response = await apiService.getIssueById(id as string);
       if (response.success && response.data) {
         setIssue(response.data);
       }
@@ -51,16 +50,13 @@ export default function IssueDetailsScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            setDeleting(true);
             try {
-              await apiService.deleteIssue(id);
+              await apiService.deleteIssue(id as string);
               Alert.alert('Success', 'Issue deleted successfully', [
                 { text: 'OK', onPress: () => router.back() },
               ]);
             } catch (error: any) {
               Alert.alert('Error', error.message || 'Failed to delete issue');
-            } finally {
-              setDeleting(false);
             }
           },
         },
@@ -84,28 +80,26 @@ export default function IssueDetailsScreen() {
     );
   }
 
-  const statusObj = ISSUE_STATUS.find((s) => s.value === issue.status);
-  const categoryObj = ISSUE_CATEGORIES.find((c) => c.value === issue.category);
-  const priorityObj = ISSUE_PRIORITIES.find((p) => p.value === issue.priority);
-  const reportedBy =
-    typeof issue.reportedBy === 'object' ? issue.reportedBy.name : 'Unknown';
-
-  const canEdit = user?.role === 'student' && issue.status === 'open';
-  const canDelete = user?.role === 'student' && issue.status === 'open';
+  const canEdit = issue.status === 'open' && user?._id === issue.reportedBy;
+  const categoryLabel = ISSUE_CATEGORIES.find((c) => c.value === issue.category)?.label || issue.category;
+  const priorityLabel = ISSUE_PRIORITIES.find((p) => p.value === issue.priority)?.label || issue.priority;
+  const statusLabel = ISSUE_STATUS.find((s) => s.value === issue.status)?.label || issue.status;
+  const statusColor = ISSUE_STATUS.find((s) => s.value === issue.status)?.color || Colors.light.textSecondary;
+  const priorityColor = ISSUE_PRIORITIES.find((p) => p.value === issue.priority)?.color || Colors.light.textSecondary;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <Card style={styles.card}>
         <View style={styles.header}>
           <Text style={styles.title}>{issue.title}</Text>
           <View
             style={[
               styles.statusBadge,
-              { backgroundColor: statusObj?.color + '20' },
+              { backgroundColor: statusColor + '20' },
             ]}
           >
-            <Text style={[styles.statusText, { color: statusObj?.color }]}>
-              {statusObj?.label || issue.status}
+            <Text style={[styles.statusText, { color: statusColor }]}>
+              {statusLabel}
             </Text>
           </View>
         </View>
@@ -115,22 +109,13 @@ export default function IssueDetailsScreen() {
         <View style={styles.metaContainer}>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Category:</Text>
-            <Text style={styles.metaValue}>{categoryObj?.label || issue.category}</Text>
+            <Text style={styles.metaValue}>{categoryLabel}</Text>
           </View>
           <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Priority:</Text>
-            <View
-              style={[
-                styles.priorityBadge,
-                { backgroundColor: priorityObj?.color + '20' },
-              ]}
-            >
-              <Text
-                style={[styles.priorityText, { color: priorityObj?.color }]}
-              >
-                {priorityObj?.label || issue.priority}
-              </Text>
-            </View>
+            <Text style={[styles.metaValue, { color: priorityColor }]}>
+              {priorityLabel}
+            </Text>
           </View>
           {issue.location && (
             <View style={styles.metaRow}>
@@ -139,20 +124,24 @@ export default function IssueDetailsScreen() {
             </View>
           )}
           <View style={styles.metaRow}>
-            <Text style={styles.metaLabel}>Reported by:</Text>
-            <Text style={styles.metaValue}>{reportedBy}</Text>
-          </View>
-          <View style={styles.metaRow}>
             <Text style={styles.metaLabel}>Created:</Text>
             <Text style={styles.metaValue}>
               {new Date(issue.createdAt).toLocaleString()}
             </Text>
           </View>
+          {issue.resolvedAt && (
+            <View style={styles.metaRow}>
+              <Text style={styles.metaLabel}>Resolved:</Text>
+              <Text style={styles.metaValue}>
+                {new Date(issue.resolvedAt).toLocaleString()}
+              </Text>
+            </View>
+          )}
         </View>
 
         {issue.imageUrl && (
           <View style={styles.imageContainer}>
-            <Image source={{ uri: issue.imageUrl }} style={styles.image} />
+            <Image source={{ uri: issue.imageUrl }} style={styles.image} contentFit="cover" />
           </View>
         )}
 
@@ -162,31 +151,26 @@ export default function IssueDetailsScreen() {
             <Text style={styles.remarksText}>{issue.remarks}</Text>
           </View>
         )}
-
-        {(canEdit || canDelete) && (
-          <View style={styles.actionsContainer}>
-            {canEdit && (
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => router.push(`/(tabs)/edit-issue?id=${issue._id}`)}
-              >
-                <Text style={styles.editButtonText}>Edit Issue</Text>
-              </TouchableOpacity>
-            )}
-            {canDelete && (
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={handleDelete}
-                disabled={deleting}
-              >
-                <Text style={styles.deleteButtonText}>
-                  {deleting ? 'Deleting...' : 'Delete Issue'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
       </Card>
+
+      {canEdit && (
+        <Card style={styles.card}>
+          <Text style={styles.sectionTitle}>Actions</Text>
+          <View style={styles.actionsContainer}>
+            <Button
+              title="Edit Issue"
+              onPress={() => router.push(`/(tabs)/edit-issue?id=${issue._id}`)}
+              style={styles.actionButton}
+            />
+            <Button
+              title="Delete Issue"
+              onPress={handleDelete}
+              variant="danger"
+              style={styles.actionButton}
+            />
+          </View>
+        </Card>
+      )}
 
       {issue.statusHistory && issue.statusHistory.length > 0 && (
         <Card style={styles.card}>
@@ -216,6 +200,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
   },
+  scrollContent: {
+    paddingTop: 8,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -228,6 +215,8 @@ const styles = StyleSheet.create({
   },
   card: {
     margin: 16,
+    marginTop: 24,
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
@@ -245,7 +234,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   statusText: {
     fontSize: 12,
@@ -255,106 +244,71 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.text,
     lineHeight: 24,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   metaContainer: {
-    marginBottom: 16,
+    marginTop: 8,
   },
   metaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 12,
   },
   metaLabel: {
     fontSize: 14,
+    fontWeight: '600',
     color: Colors.light.textSecondary,
-    fontWeight: '500',
+    width: 100,
   },
   metaValue: {
     fontSize: 14,
     color: Colors.light.text,
-    fontWeight: '600',
-  },
-  priorityBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  priorityText: {
-    fontSize: 12,
-    fontWeight: '600',
+    flex: 1,
   },
   imageContainer: {
     marginTop: 16,
-    marginBottom: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   image: {
     width: '100%',
-    height: 300,
-    borderRadius: 8,
+    height: 200,
   },
   remarksContainer: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: Colors.light.background,
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: Colors.light.surface,
     borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.light.primary,
   },
   remarksLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.light.text,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   remarksText: {
     fontSize: 14,
-    color: Colors.light.text,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
-  },
-  editButton: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: Colors.light.primary,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  editButtonText: {
-    color: Colors.light.secondary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  deleteButton: {
-    flex: 1,
-    paddingVertical: 12,
-    backgroundColor: Colors.light.error,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    color: Colors.light.secondary,
-    fontSize: 14,
-    fontWeight: '600',
+    color: Colors.light.textSecondary,
+    lineHeight: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: Colors.light.text,
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  actionsContainer: {
+    gap: 12,
+  },
+  actionButton: {
+    marginBottom: 0,
   },
   historyItem: {
-    paddingBottom: 12,
-    marginBottom: 12,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.light.border,
   },
   historyStatus: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.light.text,
     marginBottom: 4,
@@ -365,7 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   historyRemarks: {
-    fontSize: 12,
+    fontSize: 14,
     color: Colors.light.textSecondary,
     fontStyle: 'italic',
   },

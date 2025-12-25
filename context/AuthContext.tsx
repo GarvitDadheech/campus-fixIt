@@ -5,6 +5,7 @@ import { STORAGE_KEYS } from '../constants/config';
 import { apiService } from '../services/api';
 import { logout as logoutAction, setUser } from '../store/authSlice';
 import { LoginInput, RegisterInput, User } from '../types';
+import { showErrorToast } from '../utils/toast';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Load user from storage on mount
   useEffect(() => {
     loadUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadUser = async () => {
@@ -67,15 +69,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error(response.message || 'Login failed');
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Login failed');
+      // Show toast with detailed error
+      showErrorToast(error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (data: RegisterInput) => {
+    // Don't set isLoading during registration to prevent redirects
+    // The register screen handles its own loading state
     try {
-      setIsLoading(true);
       const response = await apiService.register(data);
 
       if (response.success && response.data) {
@@ -94,9 +99,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error(response.message || 'Registration failed');
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Registration failed');
-    } finally {
-      setIsLoading(false);
+      // Show toast with detailed error
+      showErrorToast(error);
+      throw error;
     }
   };
 
@@ -126,7 +131,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUserState(userData);
         dispatch(setUser(userData));
       }
-    } catch (error) {
+    } catch {
       // If refresh fails, logout user
       await logout();
     }

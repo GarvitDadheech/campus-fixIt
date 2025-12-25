@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     RefreshControl,
     ScrollView,
@@ -52,6 +52,12 @@ export default function AdminDashboardScreen() {
   useEffect(() => {
     loadStats();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);

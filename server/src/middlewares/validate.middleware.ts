@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { z, ZodError } from 'zod';
 import { IssueCategory, IssuePriority, IssueStatus, UserRole } from '../types';
-import { ApiError } from '../utils';
+import { ApiError, log } from '../utils';
 
 // Type for any Zod schema
 type ZodSchema = z.ZodType<any, any, any>;
@@ -24,6 +24,13 @@ export const validate = (schema: ZodSchema) => {
           field: err.path.join('.'),
           message: err.message,
         }));
+        // Log validation errors for debugging
+        log.warn('Validation failed', {
+          path: req.path,
+          method: req.method,
+          errors: formattedErrors,
+          body: req.body,
+        });
         return next(ApiError.badRequest('Validation failed', formattedErrors));
       }
       next(error);
@@ -32,6 +39,14 @@ export const validate = (schema: ZodSchema) => {
 };
 
 // ==================== AUTH SCHEMAS ====================
+
+// Helper to preprocess empty strings to undefined for optional fields
+const preprocessEmptyString = (val: unknown) => {
+  if (typeof val === 'string' && val.trim() === '') {
+    return undefined;
+  }
+  return val;
+};
 
 export const registerSchema = z.object({
   body: z.object({
@@ -49,20 +64,18 @@ export const registerSchema = z.object({
       .string({ message: 'Password is required' })
       .min(6, 'Password must be at least 6 characters'),
     studentId: z
-      .string()
-      .max(20, 'Student ID cannot exceed 20 characters')
-      .trim()
-      .optional(),
+      .preprocess(preprocessEmptyString, z.string().max(20, 'Student ID cannot exceed 20 characters').trim().optional()),
     department: z
-      .string()
-      .max(100, 'Department cannot exceed 100 characters')
-      .trim()
-      .optional(),
+      .preprocess(preprocessEmptyString, z.string().max(100, 'Department cannot exceed 100 characters').trim().optional()),
     phone: z
-      .string()
-      .regex(/^[\d\s\-+()]+$/, 'Please provide a valid phone number')
-      .trim()
-      .optional(),
+      .preprocess(
+        preprocessEmptyString,
+        z
+          .string()
+          .regex(/^[\d\s\-+()]+$/, 'Please provide a valid phone number')
+          .trim()
+          .optional()
+      ),
   }),
 });
 
@@ -189,26 +202,20 @@ export const addRemarksSchema = z.object({
 export const updateProfileSchema = z.object({
   body: z.object({
     name: z
-      .string()
-      .min(2, 'Name must be at least 2 characters')
-      .max(50, 'Name cannot exceed 50 characters')
-      .trim()
-      .optional(),
+      .preprocess(preprocessEmptyString, z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name cannot exceed 50 characters').trim().optional()),
     phone: z
-      .string()
-      .regex(/^[\d\s\-+()]+$/, 'Please provide a valid phone number')
-      .trim()
-      .optional(),
+      .preprocess(
+        preprocessEmptyString,
+        z
+          .string()
+          .regex(/^[\d\s\-+()]+$/, 'Please provide a valid phone number')
+          .trim()
+          .optional()
+      ),
     department: z
-      .string()
-      .max(100, 'Department cannot exceed 100 characters')
-      .trim()
-      .optional(),
+      .preprocess(preprocessEmptyString, z.string().max(100, 'Department cannot exceed 100 characters').trim().optional()),
     studentId: z
-      .string()
-      .max(20, 'Student ID cannot exceed 20 characters')
-      .trim()
-      .optional(),
+      .preprocess(preprocessEmptyString, z.string().max(20, 'Student ID cannot exceed 20 characters').trim().optional()),
   }),
 });
 

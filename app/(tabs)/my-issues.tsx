@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -31,17 +31,27 @@ export default function MyIssuesScreen() {
       }
 
       const response = await apiService.getMyIssues(params);
+      
       if (response.success && response.data) {
-        const newIssues = response.data.data;
+        const newIssues = Array.isArray(response.data) ? response.data : [];
+        
         if (reset) {
           setIssues(newIssues);
         } else {
           setIssues([...issues, ...newIssues]);
         }
-        setHasMore(response.data.pagination?.hasNextPage || false);
+        
+        setHasMore(response.pagination?.hasNextPage || false);
+      } else {
+        if (reset) {
+          setIssues([]);
+        }
       }
     } catch (error) {
       console.error('Error loading issues:', error);
+      if (reset) {
+        setIssues([]);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -51,6 +61,12 @@ export default function MyIssuesScreen() {
   useEffect(() => {
     loadIssues(1, true);
   }, [filter]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadIssues(1, true);
+    }, [filter])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -213,6 +229,7 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
+    paddingTop: 24,
     gap: 8,
   },
   filterButton: {

@@ -101,7 +101,8 @@ class ApiService {
       const apiError = new Error(message) as any;
       apiError.status = status;
       apiError.data = data;
-      apiError.errors = data?.errors;
+      // Extract validation errors from response
+      apiError.errors = data?.errors || (data?.data?.errors ? data.data.errors : undefined);
       return apiError;
     } else if (error.request) {
       // Request made but no response
@@ -170,7 +171,9 @@ class ApiService {
     const queryString = params
       ? '?' + new URLSearchParams(params as any).toString()
       : '';
-    return this.request<{ data: any[]; pagination: any }>('GET', `/issues/my${queryString}`);
+    // ApiResponse.paginated returns: { data: [...issues...], pagination: {...} }
+    // So the generic type should be the array of issues directly
+    return this.request<any[]>('GET', `/issues/my${queryString}`);
   }
 
   async getAllIssues(params?: {
@@ -183,7 +186,9 @@ class ApiService {
     const queryString = params
       ? '?' + new URLSearchParams(params as any).toString()
       : '';
-    return this.request<{ data: any[]; pagination: any }>('GET', `/issues${queryString}`);
+    // ApiResponse.paginated returns: { data: [...issues...], pagination: {...} }
+    // So the generic type should be the array of issues directly
+    return this.request<any[]>('GET', `/issues${queryString}`);
   }
 
   async getIssueById(issueId: string) {

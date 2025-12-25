@@ -22,6 +22,7 @@ export default function RegisterScreen() {
     department: '',
     phone: '',
   });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -43,6 +44,7 @@ export default function RegisterScreen() {
     }
 
     setError('');
+    setFieldErrors({});
     setLoading(true);
 
     try {
@@ -56,7 +58,16 @@ export default function RegisterScreen() {
       });
       router.replace('/(tabs)');
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+      if (err?.errors && Array.isArray(err.errors)) {
+        const errors: Record<string, string> = {};
+        err.errors.forEach((validationError: { field: string; message: string }) => {
+          const fieldName = validationError.field.replace('body.', '');
+          errors[fieldName] = validationError.message;
+        });
+        setFieldErrors(errors);
+      } else {
+        setError(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -83,58 +94,100 @@ export default function RegisterScreen() {
             label="Full Name *"
             placeholder="Enter your full name"
             value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, name: text });
+              if (fieldErrors.name) {
+                setFieldErrors({ ...fieldErrors, name: '' });
+              }
+            }}
             autoCapitalize="words"
+            error={fieldErrors.name}
           />
 
           <Input
             label="Email *"
             placeholder="Enter your email"
             value={formData.email}
-            onChangeText={(text) => setFormData({ ...formData, email: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, email: text });
+              if (fieldErrors.email) {
+                setFieldErrors({ ...fieldErrors, email: '' });
+              }
+            }}
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            error={fieldErrors.email}
           />
 
           <Input
             label="Password *"
             placeholder="Enter your password"
             value={formData.password}
-            onChangeText={(text) => setFormData({ ...formData, password: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, password: text });
+              if (fieldErrors.password) {
+                setFieldErrors({ ...fieldErrors, password: '' });
+              }
+            }}
             secureTextEntry
             autoCapitalize="none"
+            error={fieldErrors.password}
           />
 
           <Input
             label="Confirm Password *"
             placeholder="Confirm your password"
             value={formData.confirmPassword}
-            onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, confirmPassword: text });
+              if (fieldErrors.confirmPassword) {
+                setFieldErrors({ ...fieldErrors, confirmPassword: '' });
+              }
+            }}
             secureTextEntry
             autoCapitalize="none"
+            error={fieldErrors.confirmPassword}
           />
 
           <Input
             label="Student ID"
             placeholder="Enter your student ID (optional)"
             value={formData.studentId}
-            onChangeText={(text) => setFormData({ ...formData, studentId: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, studentId: text });
+              if (fieldErrors.studentId) {
+                setFieldErrors({ ...fieldErrors, studentId: '' });
+              }
+            }}
+            error={fieldErrors.studentId}
           />
 
           <Input
             label="Department"
             placeholder="Enter your department (optional)"
             value={formData.department}
-            onChangeText={(text) => setFormData({ ...formData, department: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, department: text });
+              if (fieldErrors.department) {
+                setFieldErrors({ ...fieldErrors, department: '' });
+              }
+            }}
+            error={fieldErrors.department}
           />
 
           <Input
             label="Phone"
             placeholder="Enter your phone (optional)"
             value={formData.phone}
-            onChangeText={(text) => setFormData({ ...formData, phone: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, phone: text });
+              if (fieldErrors.phone) {
+                setFieldErrors({ ...fieldErrors, phone: '' });
+              }
+            }}
             keyboardType="phone-pad"
+            error={fieldErrors.phone}
           />
 
           <Button

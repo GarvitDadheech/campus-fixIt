@@ -1,12 +1,12 @@
 import { Types } from 'mongoose';
 import { Issue, User } from '../models';
 import {
-    IIssue,
-    IIssueFilter,
-    IIssueInput,
-    IssueStatus,
-    PaginatedResponse,
-    UserRole
+  IIssue,
+  IIssueFilter,
+  IIssueInput,
+  IssueStatus,
+  PaginatedResponse,
+  UserRole
 } from '../types';
 import { ApiError, buildSortObject, calculateSkip, createPaginatedResponse, log, MESSAGES, parsePaginationParams } from '../utils';
 import { emailService } from './email.service';
@@ -120,7 +120,13 @@ class IssueService {
         .skip(skip)
         .limit(pagination.limit);
 
-      log.debug('Issues fetched', { count: issues.length, filters });
+      log.info(`Issues fetched: ${issues.length} issues found`, {
+        count: issues.length,
+        totalItems,
+        currentPage: pagination.page,
+        itemsPerPage: pagination.limit,
+        filters: JSON.stringify(filters),
+      });
 
       return createPaginatedResponse(issues, totalItems, pagination);
     } catch (error) {
@@ -137,7 +143,16 @@ class IssueService {
     filters: IIssueFilter,
     paginationQuery: any
   ): Promise<PaginatedResponse<IIssue>> {
-    return this.getAllIssues({ ...filters, reportedBy: userId }, paginationQuery);
+    const result = await this.getAllIssues({ ...filters, reportedBy: userId }, paginationQuery);
+    log.info(`User issues fetched: ${result.data.length} issues for user ${userId}`, {
+      userId,
+      count: result.data.length,
+      totalItems: result.pagination.totalItems,
+      currentPage: result.pagination.currentPage,
+      itemsPerPage: result.pagination.itemsPerPage,
+      filters: JSON.stringify(filters),
+    });
+    return result;
   }
 
   /**

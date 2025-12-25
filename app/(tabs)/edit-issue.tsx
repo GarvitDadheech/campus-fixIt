@@ -16,6 +16,7 @@ import { Button, Input } from '../../components/ui';
 import { Colors } from '../../constants/Colors';
 import { ISSUE_CATEGORIES, ISSUE_PRIORITIES } from '../../constants/config';
 import { apiService } from '../../services/api';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
 export default function EditIssueScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -121,12 +122,11 @@ export default function EditIssueScreen() {
 
       const response = await apiService.updateIssue(id, formDataToSend);
       if (response.success) {
-        Alert.alert('Success', 'Issue updated successfully!', [
-          { text: 'OK', onPress: () => router.back() },
-        ]);
+        showSuccessToast('Issue updated successfully!');
+        setTimeout(() => router.back(), 1500);
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update issue');
+      showErrorToast(error);
     } finally {
       setSaving(false);
     }

@@ -51,7 +51,7 @@ const getEnvVarAsNumber = (key: string, defaultValue?: number): number => {
 
 export const env: EnvConfig = {
   NODE_ENV: getEnvVar('NODE_ENV', 'development'),
-  PORT: getEnvVarAsNumber('PORT', 5000),
+  PORT: getEnvVarAsNumber('PORT', 3000),
   MONGODB_URI: getEnvVar('MONGODB_URI', 'mongodb://localhost:27017/campus-fixit'),
   JWT_SECRET: getEnvVar('JWT_SECRET', 'your-super-secret-jwt-key-change-in-production'),
   JWT_EXPIRES_IN: getEnvVar('JWT_EXPIRES_IN', '7d'),
